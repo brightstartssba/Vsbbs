@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun toggleSelectionMode() {
         isInSelectionMode = !isInSelectionMode
-        binding.selectButton.text = if (isInSelectionMode) "Cancel" else getString(R.string.select)
+        binding.selectButton.text = if (isInSelectionMode) "Cancel" else "Select"
         iosMediaAdapter.setSelectionMode(isInSelectionMode)
     }
 
