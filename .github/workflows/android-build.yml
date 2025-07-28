@@ -32,10 +32,6 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
-    strategy:
-      matrix:
-        api-level: [21, 33]
         
     steps:
     # Checkout repository code
@@ -79,10 +75,11 @@ jobs:
     - name: Run unit tests
       run: ./gradlew testDebugUnitTest
     
-    # Generate test report
+    # Generate test report (optional, skip if fails)
     - name: Generate test report
       uses: dorny/test-reporter@v1
       if: always()
+      continue-on-error: true
       with:
         name: Unit Tests
         path: '**/build/test-results/testDebugUnitTest/TEST-*.xml'

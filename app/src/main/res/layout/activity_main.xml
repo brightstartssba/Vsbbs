@@ -51,20 +51,18 @@
                 android:id="@+id/searchButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/ios_circle_button"
                 android:contentDescription="@string/search"
                 android:src="@drawable/ic_search"
                 app:layout_constraintEnd_toStartOf="@+id/selectButton"
-                app:layout_constraintTop_toTopOf="@+id/titlePhotos"
-                app:tint="@color/ios_blue" />
+                app:layout_constraintTop_toTopOf="@+id/titlePhotos" />
 
             <!-- Select Button -->
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/selectButton"
-                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:layout_marginStart="8dp"
                 android:background="@drawable/ios_select_button"
                 android:text="@string/select"
                 android:textAllCaps="false"
@@ -182,7 +180,7 @@
             android:textColor="@color/ios_text_primary"
             android:textSize="16sp" />
 
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/buttonPermission"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
