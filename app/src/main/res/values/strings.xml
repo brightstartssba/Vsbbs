@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Gallery</string>
+    <string name="permission_required">Cần quyền truy cập để xem ảnh và video</string>
+    <string name="grant_permission">Cấp quyền</string>
+    <string name="no_media_found">Không tìm thấy ảnh hoặc video</string>
+    <string name="loading">Đang tải...</string>
+    <string name="error_loading_media">Lỗi khi tải media</string>
+    <string name="images">Ảnh</string>
+    <string name="videos">Video</string>
+    <string name="all_media">Tất cả</string>
+</resources>
