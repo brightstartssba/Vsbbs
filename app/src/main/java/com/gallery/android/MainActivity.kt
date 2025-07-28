@@ -11,27 +11,31 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
-import com.gallery.android.adapter.MediaAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.gallery.android.adapter.IOSMediaAdapter
+import com.gallery.android.adapter.RecentDaysAdapter
+import com.gallery.android.adapter.PeoplePetsAdapter
 import com.gallery.android.databinding.ActivityMainBinding
 import com.gallery.android.model.MediaItem
-import com.gallery.android.model.MediaType
 import com.gallery.android.viewmodel.MediaViewModel
-import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MediaViewModel
-    private lateinit var mediaAdapter: MediaAdapter
+    private lateinit var iosMediaAdapter: IOSMediaAdapter
+    private lateinit var recentDaysAdapter: RecentDaysAdapter
+    private lateinit var peoplePetsAdapter: PeoplePetsAdapter
+    private var isInSelectionMode = false
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val granted = permissions.values.all { it }
         if (granted) {
-            setupRecyclerView()
+            setupRecyclerViews()
             loadMedia()
         } else {
             showPermissionDeniedUI()
@@ -45,32 +49,36 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this)[MediaViewModel::class.java]
 
-        setupTabLayout()
+        setupUIElements()
         checkPermissionsAndLoad()
-        
+    }
+
+    private fun setupUIElements() {
+        // Setup search button
+        binding.searchButton.setOnClickListener {
+            // TODO: Implement search functionality
+        }
+
+        // Setup select button
+        binding.selectButton.setOnClickListener {
+            toggleSelectionMode()
+        }
+
+        // Setup permission button
         binding.buttonPermission.setOnClickListener {
             requestMediaPermissions()
         }
     }
 
-    private fun setupTabLayout() {
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                when (tab?.position) {
-                    0 -> filterMedia(MediaType.ALL)
-                    1 -> filterMedia(MediaType.IMAGE)
-                    2 -> filterMedia(MediaType.VIDEO)
-                }
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
+    private fun toggleSelectionMode() {
+        isInSelectionMode = !isInSelectionMode
+        binding.selectButton.text = if (isInSelectionMode) "Cancel" else "Select"
+        iosMediaAdapter.setSelectionMode(isInSelectionMode)
     }
 
     private fun checkPermissionsAndLoad() {
         if (hasMediaPermissions()) {
-            setupRecyclerView()
+            setupRecyclerViews()
             loadMedia()
         } else {
             showPermissionDeniedUI()
@@ -98,52 +106,98 @@ class MainActivity : AppCompatActivity() {
         requestPermissionLauncher.launch(permissions)
     }
 
-    private fun setupRecyclerView() {
-        mediaAdapter = MediaAdapter { mediaItem ->
-            openMediaViewer(mediaItem)
+    private fun setupRecyclerViews() {
+        // Main photos grid with iOS-style staggered layout
+        iosMediaAdapter = IOSMediaAdapter { mediaItem ->
+            if (!isInSelectionMode) {
+                openMediaViewer(mediaItem)
+            }
         }
         
-        binding.recyclerView.apply {
-            layoutManager = GridLayoutManager(this@MainActivity, 3)
-            adapter = mediaAdapter
+        binding.recyclerViewMain.apply {
+            layoutManager = StaggeredGridLayoutManager(4, StaggeredGridLayoutManager.VERTICAL)
+            adapter = iosMediaAdapter
+        }
+
+        // Recent Days horizontal list
+        recentDaysAdapter = RecentDaysAdapter { mediaItems ->
+            // Open media viewer for recent days
+            if (mediaItems.isNotEmpty()) {
+                openMediaViewer(mediaItems.first())
+            }
+        }
+        
+        binding.recyclerViewRecentDays.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
+            adapter = recentDaysAdapter
+        }
+
+        // People & Pets horizontal list
+        peoplePetsAdapter = PeoplePetsAdapter { personName ->
+            // TODO: Implement people/pets filtering
+        }
+        
+        binding.recyclerViewPeoplePets.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
+            adapter = peoplePetsAdapter
         }
     }
 
     private fun loadMedia() {
         binding.progressBar.visibility = View.VISIBLE
+        hideAllContent()
         
         lifecycleScope.launch {
             try {
                 val mediaItems = viewModel.loadMediaItems(this@MainActivity)
-                mediaAdapter.updateMedia(mediaItems)
+                
+                // Update item count
+                binding.itemCount.text = getString(R.string.items_count, mediaItems.size)
+                
+                // Update main grid
+                iosMediaAdapter.updateMedia(mediaItems)
+                
+                // Update recent days (group by date)
+                val recentDaysData = groupMediaByRecentDays(mediaItems)
+                recentDaysAdapter.updateData(recentDaysData)
+                
+                // Update people & pets (mock data for now)
+                val peoplePetsData = createMockPeoplePetsData()
+                peoplePetsAdapter.updateData(peoplePetsData)
                 
                 binding.progressBar.visibility = View.GONE
                 if (mediaItems.isEmpty()) {
                     binding.textViewEmpty.visibility = View.VISIBLE
-                    binding.recyclerView.visibility = View.GONE
                 } else {
-                    binding.textViewEmpty.visibility = View.GONE
-                    binding.recyclerView.visibility = View.VISIBLE
+                    showAllContent()
                 }
             } catch (e: Exception) {
                 binding.progressBar.visibility = View.GONE
                 binding.textViewEmpty.visibility = View.VISIBLE
-                binding.recyclerView.visibility = View.GONE
             }
         }
     }
 
-    private fun filterMedia(type: MediaType) {
-        mediaAdapter.filterByType(type)
-        
-        val filteredCount = mediaAdapter.itemCount
-        if (filteredCount == 0) {
-            binding.textViewEmpty.visibility = View.VISIBLE
-            binding.recyclerView.visibility = View.GONE
-        } else {
-            binding.textViewEmpty.visibility = View.GONE
-            binding.recyclerView.visibility = View.VISIBLE
-        }
+    private fun groupMediaByRecentDays(mediaItems: List<MediaItem>): List<Pair<String, List<MediaItem>>> {
+        // Group media by date and take top 3 recent days
+        return mediaItems
+            .groupBy { mediaItem ->
+                // Convert timestamp to date string
+                val date = java.text.SimpleDateFormat("MMM dd", java.util.Locale.getDefault())
+                    .format(java.util.Date(mediaItem.dateAdded * 1000))
+                date
+            }
+            .toList()
+            .take(3)
+    }
+
+    private fun createMockPeoplePetsData(): List<Pair<String, String>> {
+        // Mock data for people & pets - in real app this would come from ML face detection
+        return listOf(
+            "Person 1" to "",
+            "Person 2" to "",
+            "Pet 1" to ""
+        )
     }
 
     private fun openMediaViewer(mediaItem: MediaItem) {
@@ -155,10 +209,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showPermissionDeniedUI() {
-        binding.recyclerView.visibility = View.GONE
+        hideAllContent()
         binding.progressBar.visibility = View.GONE
+        binding.permissionLayout.visibility = View.VISIBLE
+    }
+
+    private fun hideAllContent() {
+        binding.recyclerViewMain.visibility = View.GONE
+        binding.recyclerViewRecentDays.visibility = View.GONE
+        binding.recyclerViewPeoplePets.visibility = View.GONE
+        binding.recentDaysTitle.visibility = View.GONE
+        binding.peoplePetsTitle.visibility = View.GONE
         binding.textViewEmpty.visibility = View.GONE
-        binding.textViewPermission.visibility = View.VISIBLE
-        binding.buttonPermission.visibility = View.VISIBLE
+        binding.permissionLayout.visibility = View.GONE
+    }
+
+    private fun showAllContent() {
+        binding.recyclerViewMain.visibility = View.VISIBLE
+        binding.recyclerViewRecentDays.visibility = View.VISIBLE
+        binding.recyclerViewPeoplePets.visibility = View.VISIBLE
+        binding.recentDaysTitle.visibility = View.VISIBLE
+        binding.peoplePetsTitle.visibility = View.VISIBLE
     }
 }

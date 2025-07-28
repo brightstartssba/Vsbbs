@@ -15,7 +15,9 @@ An Android mobile application for viewing images and videos with automated GitHu
 ## User Preferences
 - Vietnamese language communication preferred
 - Focus on modern Android development practices
-- Automated CI/CD pipeline for APK generation
+- **iOS Photos app interface design** - match iOS Photos app screenshots exactly
+- Automated CI/CD pipeline for APK generation following GitHub official documentation
+- Emphasis on avoiding GitHub Actions build errors
 
 ## Project Architecture
 - **app/**: Main Android application module
@@ -27,16 +29,34 @@ An Android mobile application for viewing images and videos with automated GitHu
 - 2025-07-28: ✅ Complete Android Gallery app structure created
 - 2025-07-28: ✅ GitHub Actions workflow configured for automated APK building
 - 2025-07-28: ✅ Modern Android architecture implemented with MVVM + Kotlin
-- 2025-07-28: ✅ Material Design 3 UI with image/video gallery features
+- 2025-07-28: ✅ **iOS Photos app interface redesign completed**
+  - iOS-style header with "Photos" title and item count
+  - Search and Select buttons matching iOS design
+  - Staggered grid layout with variable photo sizes
+  - Recent Days horizontal scroll section
+  - People & Pets section with circular avatars
+  - iOS color scheme and typography
+- 2025-07-28: ✅ Enhanced GitHub Actions workflow following official documentation
+  - Latest actions (checkout@v4, setup-java@v4, setup-gradle@v4)
+  - Build matrix, caching, and proper artifact management
+  - Lint checks, unit tests, and automated releases
 - 2025-07-28: ✅ ExoPlayer integration for video playback
 - 2025-07-28: ✅ Glide integration for image loading with thumbnails
 - 2025-07-28: ✅ Permission handling for Android 13+ storage access
 - 2025-07-28: ✅ Project ready for GitHub deployment and CI/CD
 
 ## Features
-- ✅ Image gallery viewing
-- ✅ Video playback support
-- ✅ Modern UI with Material Design 3
+- ✅ **iOS-style Photos interface** matching user screenshots
+  - Large "Photos" title with dynamic item count
+  - iOS-style search and select buttons
+  - Staggered grid layout with variable photo sizes
+  - Recent Days horizontal scroll section with date labels
+  - People & Pets section with circular avatars
+- ✅ Image gallery viewing with Glide
+- ✅ Video playback support with ExoPlayer
+- ✅ Selection mode with iOS-style checkmarks
+- ✅ Modern UI with iOS color scheme and typography
+- ✅ Enhanced GitHub Actions workflow with latest best practices
 - ✅ Automated APK builds via GitHub Actions
 - ✅ Support for various image formats (JPEG, PNG, GIF, WebP)
 - ✅ Support for video formats (MP4, AVI, MOV)

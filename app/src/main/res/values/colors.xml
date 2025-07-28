@@ -13,4 +13,13 @@
     <color name="on_background">#FF000000</color>
     <color name="on_surface">#FF000000</color>
     <color name="on_error">#FFFFFFFF</color>
+    
+    <!-- iOS-style colors -->
+    <color name="ios_background">#FFFFFFFF</color>
+    <color name="ios_text_primary">#FF000000</color>
+    <color name="ios_text_secondary">#FF8E8E93</color>
+    <color name="ios_blue">#FF007AFF</color>
+    <color name="ios_selection_overlay">#4D007AFF</color>
+    <color name="ios_separator">#FFE5E5EA</color>
+    <color name="ios_card_background">#FFF6F6F6</color>
 </resources>
